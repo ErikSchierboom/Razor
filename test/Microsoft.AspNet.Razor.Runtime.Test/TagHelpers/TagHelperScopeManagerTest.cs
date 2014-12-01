@@ -2,6 +2,8 @@
 // Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
 
 using System;
+using System.IO;
+using System.Threading.Tasks;
 using Microsoft.AspNet.Razor.Runtime.TagHelpers;
 using Xunit;
 
@@ -9,6 +11,11 @@ namespace Microsoft.AspNet.Razor.Runtime.Test.TagHelpers
 {
     public class TagHelperScopeManagerTest
     {
+        private static readonly Action DefaultStartWritingScope = () => { };
+        private static readonly Func<TextWriter> DefaultEndWritignScope = () => new StringWriter();
+        private static readonly Func<Task> DefaultExecuteChildContentAsync =
+            async () => await Task.FromResult(result: true);
+
         [Fact]
         public void Begin_CreatesContextWithAppropriateTagName()
         {
@@ -16,7 +23,10 @@ namespace Microsoft.AspNet.Razor.Runtime.Test.TagHelpers
             var scopeManager = new TagHelperScopeManager();
 
             // Act
-            var executionContext = scopeManager.Begin("p");
+            var executionContext = scopeManager.Begin("p",
+                                                      DefaultExecuteChildContentAsync,
+                                                      DefaultStartWritingScope,
+                                                      DefaultEndWritignScope);
 
             // Assert
             Assert.Equal("p", executionContext.TagName);
@@ -29,8 +39,14 @@ namespace Microsoft.AspNet.Razor.Runtime.Test.TagHelpers
             var scopeManager = new TagHelperScopeManager();
 
             // Act
-            var executionContext = scopeManager.Begin("p");
-            executionContext = scopeManager.Begin("div");
+            var executionContext = scopeManager.Begin("p",
+                                                      DefaultExecuteChildContentAsync,
+                                                      DefaultStartWritingScope,
+                                                      DefaultEndWritignScope);
+            executionContext = scopeManager.Begin("div",
+                                                  DefaultExecuteChildContentAsync,
+                                                  DefaultStartWritingScope,
+                                                  DefaultEndWritignScope);
 
             // Assert
             Assert.Equal("div", executionContext.TagName);
@@ -43,8 +59,14 @@ namespace Microsoft.AspNet.Razor.Runtime.Test.TagHelpers
             var scopeManager = new TagHelperScopeManager();
 
             // Act
-            var executionContext = scopeManager.Begin("p");
-            executionContext = scopeManager.Begin("div");
+            var executionContext = scopeManager.Begin("p",
+                                                      DefaultExecuteChildContentAsync,
+                                                      DefaultStartWritingScope,
+                                                      DefaultEndWritignScope);
+            executionContext = scopeManager.Begin("div",
+                                                  DefaultExecuteChildContentAsync,
+                                                  DefaultStartWritingScope,
+                                                  DefaultEndWritignScope);
             executionContext = scopeManager.End();
 
             // Assert
@@ -58,8 +80,14 @@ namespace Microsoft.AspNet.Razor.Runtime.Test.TagHelpers
             var scopeManager = new TagHelperScopeManager();
 
             // Act
-            var executionContext = scopeManager.Begin("p");
-            executionContext = scopeManager.Begin("div");
+            var executionContext = scopeManager.Begin("p",
+                                                      DefaultExecuteChildContentAsync,
+                                                      DefaultStartWritingScope,
+                                                      DefaultEndWritignScope);
+            executionContext = scopeManager.Begin("div",
+                                                  DefaultExecuteChildContentAsync,
+                                                  DefaultStartWritingScope,
+                                                  DefaultEndWritignScope);
             executionContext = scopeManager.End();
             executionContext = scopeManager.End();
 
@@ -85,7 +113,6 @@ namespace Microsoft.AspNet.Razor.Runtime.Test.TagHelpers
             });
 
             Assert.Equal(expectedError, ex.Message);
-
         }
     }
 }
