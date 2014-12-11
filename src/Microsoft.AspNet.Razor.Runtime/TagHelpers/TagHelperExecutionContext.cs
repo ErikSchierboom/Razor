@@ -21,7 +21,7 @@ namespace Microsoft.AspNet.Razor.Runtime.TagHelpers
         /// </summary>
         internal TagHelperExecutionContext(string tagName)
             : this(tagName,
-                   executeChildContentAsync: async () => await Task.FromResult(result: true),
+                   executeChildContentAsync: () => Task.FromResult(result: true),
                    startWritingScope: () => { },
                    endWritingScope: () => new StringWriter())
         {

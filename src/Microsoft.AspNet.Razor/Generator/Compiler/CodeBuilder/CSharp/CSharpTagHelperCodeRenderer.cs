@@ -320,6 +320,8 @@ namespace Microsoft.AspNet.Razor.Generator.Compiler.CSharp
                    .Write(_tagHelperContext.OutputContentSetPropertyName)
                    .WriteLine(")");
 
+            // Render the body of the if statement, at this point in the codegen the TagHelperOutput's Content was set
+            // so we should just render its Content, no need to forcefully execute the child content.
             using (_writer.BuildScope())
             {
                 RenderTagOutput(_tagHelperContext.OutputGenerateContentMethodName);
@@ -331,6 +333,9 @@ namespace Microsoft.AspNet.Razor.Generator.Compiler.CSharp
                    .Write(_tagHelperContext.ExecutionContextChildContentRetrievedPropertyName)
                    .WriteLine(")");
 
+            // Render the body of the else if statement, at this point in the codegen the GetChildContentAsync method 
+            // was invoked but the TagHelperOutput's Content was not set. Call into GetChildContentAsync to retrieve
+            // the cached value of the content so we don't execute the child content twice.
             using (_writer.BuildScope())
             {
                 CSharpCodeVisitor.RenderPreWriteStart(_writer, _context);
@@ -347,6 +352,9 @@ namespace Microsoft.AspNet.Razor.Generator.Compiler.CSharp
 
             _writer.WriteLine("else");
 
+            // Render the body of the else statement, at this point in the codegen the GetChildContentAsync method 
+            // was not invoked and the TagHelperOutput's Content was not set. Call into ExecuteChildContentAsync to
+            // to execute and render child content.
             using (_writer.BuildScope())
             {
                 _writer.WriteInstanceMethodInvocation(
